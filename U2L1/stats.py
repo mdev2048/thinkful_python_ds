@@ -34,9 +34,9 @@ df['Tobacco'] = df['Tobacco'].astype(float)
 
 # Question 1
 for tgtString in ["Alcohol","Tobacco"]:
-	print tgtString, "mean", df['Alcohol'].mean()
-	print tgtString, "median", df['Alcohol'].median()
-	print tgtString, "mode", df['Alcohol'].mode()
+	print tgtString, "mean", df[tgtString].mean()
+	print tgtString, "median", df[tgtString].median()
+	print tgtString, "mode", stats.mode(df[tgtString])
 	print ""
 
 
@@ -46,4 +46,5 @@ for tgtString in ["Alcohol","Tobacco"]:
 	print tgtString, "range", max(df[tgtString]) - min(df[tgtString])
 	print tgtString, "variance", df[tgtString].var()
 	print tgtString, "std", df[tgtString].std()
+	print ""
 	

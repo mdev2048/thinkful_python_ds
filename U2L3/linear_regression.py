@@ -1,8 +1,10 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import statsmodels.api as sm
 
 loansData = pd.read_csv('https://spark-public.s3.amazonaws.com/dataanalysis/loansData.csv')
+
 loansData.dropna(inplace=True)
 # print loansData['Interest.Rate'][0:5] # first 5 rows of Interest.Rate
 # 81174     8.90%
@@ -44,6 +46,9 @@ loansData['Loan.Length'] = map(lambda s: s.replace(" months",""),loansData['Loan
 # print loansData['Loan.Length'][:5]
 
 
+for key in loansData:
+	print key,"\t",len(loansData[key])
+
 
 # Convert FICO scores into a numerical value, and save it in a new column called FICO.Score. 
 # Since the ranges are small, we're going to go ahead and pick the first number to represent 
@@ -64,16 +69,49 @@ plt.show()
 
 
 # ISSUE: scatter matrix does not display Interest Rate 
-a = pd.scatter_matrix(loansData, alpha=0.05, figsize=(10,10))
-plt.title("Loans Data Scatter Matrix")
-plt.show()
+# a = pd.scatter_matrix(loansData, alpha=0.05, figsize=(10,10))
+# plt.title("Loans Data Scatter Matrix")
+# plt.show()
 
 # p = pd.scatter_matrix(loansData, alpha=0.05, figsize=(10,10), diagonal='hist')
 # plt.show()
-
 
 # Where do you see a noticeable trend in the scatterplot? 
 
 # Where don't you see a noticeable trend? 
 
 # What does this mean in practice?
+
+
+
+# ======== U2L3Project =============
+intrate = loansData['Interest.Rate']
+fico = loansData['FICO.Score']
+for key in loansData:
+	print key
+
+exit()
+loanamt = loansData['Amount.Funded.By.Investors'] # ISSUE, nonexistant Loan.Amounts
+
+# convert to int
+
+loansData['Amount.Funded.By.Investors'] = map(lambda s: float(s),loansData['Amount.Funded.By.Investors'])
+
+
+
+# The dependent variable
+y = np.matrix(intrate).transpose()
+# The independent variables shaped as columns
+x1 = np.matrix(fico).transpose()
+x2 = np.matrix(loanamt).transpose()
+
+x = np.column_stack([x1,x2])
+
+X = sm.add_constant(x)
+model = sm.OLS(y,X)
+f = model.fit()
+
+print 'Coefficients: ', f.params[0:2]
+print 'Intercept: ', f.params[2]
+print 'P-Values: ', f.pvalues
+print 'R-Squared: ', f.rsquared

@@ -1,10 +1,12 @@
 import requests
 from pandas.io.json import json_normalize
+import matplotlib
 import matplotlib.pyplot as plt
 import pandas as pd
 import sqlite3 as lite
 import datetime
 import time
+import json
 
 # a package for parsing a string into a Python datetime object
 from dateutil.parser import parse 
@@ -52,7 +54,8 @@ cities = { "Atlanta": '33.762909,-84.422675',
             "Austin": '30.303936,-97.754355',
             "Boston": '42.331960,-71.020173',
             "Chicago": '41.837551,-87.681844',
-            "Cleveland": '41.478462,-81.679435'
+            "Cleveland": '41.478462,-81.679435',
+            "NewYork":'40.712784,-74.005941'
         }
 
 def init_city_table():
@@ -94,7 +97,7 @@ def get_max_depth_level(tgtJson):
 			curDepth.append(get_max_depth_level(curElement)+1)
 	return max(curDepth)
 
-print get_max_depth_level(tempRES)
+print "How many levels does the data have? " + str(get_max_depth_level(tempRES))
 
 
 # Which field do we want to save to get the daily maximum temperature?
@@ -109,6 +112,8 @@ def update_hourly():
 	con = lite.connect('weather.db')
 	cur = con.cursor()
 	for key in cities:
+		if key != 'NewYork':
+			continue
 		for i in range(0,30):
 			curDate = datetime.datetime.now() - datetime.timedelta(days=i)
 			curTime = curDate.strftime("%Y-%m-%dT%H:%M:%S")
@@ -120,6 +125,7 @@ def update_hourly():
 				curHourly["longitude"] = cities[key].split(",")[1]
 				print getInsertFromDict(curHourly)
 				cur.execute(getInsertFromDict(curHourly))
+		break
 	con.commit()
 	con.close()
 
@@ -136,8 +142,13 @@ def getInsertFromDict(tgtJson):
 	tgtInsertQuery += " VALUES (" + ",".join(tgtValueList) + ")"
 	return  tgtInsertQuery
 
-init_db()
-init_city_table()
+def dict_factory(cursor, row):
+	d = {}
+	for idx, col in enumerate(cursor.description):
+		d[col[0]] = row[idx]
+	return d
+# init_db()
+# init_city_table()
 # Write a script that takes each city and queries every day for the past 30 days 
 # (Hint: You can use the datetime.timedelta(days=1) to increment the value by day) 
 update_hourly()
@@ -146,3 +157,28 @@ update_hourly()
 # Save the max temperature values to the table, keyed on the date. 
 # You can leave the date in Unix time or convert to a string. 
 tgtQuery = "select distinct latitude,longitude, max(temperature),time  from hourly group by latitude,longitude"
+
+tgtQuery = "select * from hourly where  latitude = 40.712784 and longitude = -74.005941 order by time desc;"
+con = lite.connect('weather.db')
+cur = con.cursor()
+
+cur.execute(tgtQuery)
+rows = [x for x in cur]
+cols = [x[0] for x in cur.description]
+data = []
+for row in rows:
+	curData = {}
+	for prop, val in zip(cols, row):
+		if prop == "time":
+			curData[prop] = datetime.datetime.fromtimestamp(val)
+		else:
+			curData[prop] = val
+	data.append(curData)
+
+
+df = json_normalize(data)
+
+print df['temperature']
+dates = matplotlib.dates.date2num(df['time'])
+plt.plot_date(dates, df['temperature'],'-')
+plt.show()

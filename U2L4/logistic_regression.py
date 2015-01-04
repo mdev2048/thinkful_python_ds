@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np 
 import statsmodels.api as sm
+import math
 
 
 df = pd.read_csv('https://spark-public.s3.amazonaws.com/dataanalysis/loansData.csv')
@@ -28,10 +29,10 @@ df['FICO.Score']=FICO
 
 
 # Does not work
-print "Works"
-print df[df['Interest.Rate'] == 10].head() # should all be True
-print "Doesn't work"
-print df[df['Interest.Rate'] == 13].head() # should all be False
+# print "Works"
+# print df[df['Interest.Rate'] == 10].head() # should all be True
+# print "Doesn't work"
+# print df[df['Interest.Rate'] == 13].head() # should all be False
 
 
 # Unit 2 Lesson 4 Project 3
@@ -54,3 +55,30 @@ logit = sm.Logit(df['IR_TF'], X)
 result = logit.fit()
 coeff = result.params
 print coeff
+
+def getInterestRate(tgtFicoScore, tgtLoanAmount, tgtCoeff):
+	b = tgtCoeff['Intercept']
+	a1 = tgtCoeff['FICO.Score']
+	a2 = tgtCoeff['Amount.Requested']
+	curIntRate = a1 * tgtFicoScore + a2 * tgtLoanAmount
+	print curIntRate
+
+
+# Write a function logistic_function that will take a FICO Score and a 
+# Loan Amount of this linear predictor, and return p. 
+# (Try not to hardcode any values if you can! Hint: pass the 
+# coefficients object to the function as an argument.)
+def logistic_function(tgtFicoScore, tgtLoanAmount, tgtCoeff):
+	b = tgtCoeff['Intercept']
+	a1 = tgtCoeff['FICO.Score']
+	a2 = tgtCoeff['Amount.Requested']
+	demon = (1 + math.exp(b + a1 * tgtFicoScore + a2 * tgtLoanAmount))
+	return 1 / demon
+
+print logistic_function(720,10000,coeff)
+# Determine the probability that we can obtain a loan at <=12% Interest for $10,000 with a FICO score of 720 using this function.
+
+# Is p above or below 0.70? Do you predict that we will or won't obtain the loan?
+
+# If you're feeling really adventurous, you can create a new function pred to predict whether or not we'll get the loan automatically.
+

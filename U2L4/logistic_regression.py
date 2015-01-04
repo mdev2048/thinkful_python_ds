@@ -75,10 +75,15 @@ def logistic_function(tgtFicoScore, tgtLoanAmount, tgtCoeff):
 	demon = (1 + math.exp(b + a1 * tgtFicoScore + a2 * tgtLoanAmount))
 	return 1 / demon
 
+
+# Determine the probability that we can obtain a loan at <=12% Interest 
+# for $10,000 with a FICO score of 720 using this function.
 print logistic_function(720,10000,coeff)
-# Determine the probability that we can obtain a loan at <=12% Interest for $10,000 with a FICO score of 720 using this function.
+print "Yes"
 
 # Is p above or below 0.70? Do you predict that we will or won't obtain the loan?
+print "p is below 0.7"
 
-# If you're feeling really adventurous, you can create a new function pred to predict whether or not we'll get the loan automatically.
+# If you're feeling really adventurous, you can create a new function pred to predict whether 
+# or not we'll get the loan automatically.
 

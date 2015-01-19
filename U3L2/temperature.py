@@ -151,7 +151,7 @@ def dict_factory(cursor, row):
 # init_city_table()
 # Write a script that takes each city and queries every day for the past 30 days 
 # (Hint: You can use the datetime.timedelta(days=1) to increment the value by day) 
-update_hourly()
+# update_hourly()
 
 
 # Save the max temperature values to the table, keyed on the date. 
